@@ -1,0 +1,15 @@
+# Local backups & agent workspace
+backup-pre-sdk57/
+.zcode/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Logs & OS
+*.log
+.DS_Store

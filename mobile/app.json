@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "AuraHealth",
+    "slug": "aurahealth",
+    "version": "1.0.0",
+    "scheme": "aurahealth",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Autoriser AuraHealth à accéder à votre caméra pour vos consultations vidéo."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Autoriser AuraHealth à accéder à votre position pour trouver les pharmacies les plus proches de vous."
+        }
+      ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    }
+  }
+}
