@@ -158,8 +158,8 @@ export async function generateAndStoreSummary(appointmentId: string): Promise<Su
   }
 
   await one(
-    `INSERT INTO documents (id, patient_id, name, type, date, source, size_kb) VALUES ($1,$2,$3,$4,$5,'aura',$6)`,
-    [newId('doc'), appt.patient_id, template.document.name, template.document.type, todayISO(), template.document.sizeKb],
+    `INSERT INTO documents (id, patient_id, name, type, date, source, size_kb, deep_link) VALUES ($1,$2,$3,$4,$5,'aura',$6,$7)`,
+    [newId('doc'), appt.patient_id, template.document.name, template.document.type, todayISO(), template.document.sizeKb, `/consultation/summary/${template.id}`],
   );
 
   await notify({

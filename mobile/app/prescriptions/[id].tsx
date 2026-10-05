@@ -7,6 +7,7 @@ import { colors, font, radii, spacing } from '@/constants/theme';
 import { useAppData } from '@/context/AppDataContext';
 import { useAuth } from '@/context/AuthContext';
 import { addMonths, dayLabel, fullDate } from '@/utils/format';
+import { downloadPrescriptionPdf } from '@/utils/prescriptionPdf';
 import { useState } from 'react';
 
 export default function PrescriptionDetail() {
@@ -15,7 +16,20 @@ export default function PrescriptionDetail() {
   const { role } = useAuth();
   const { show } = useToast();
   const [renewVisible, setRenewVisible] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const rx = prescriptions.find((p) => p.id === id);
+
+  const download = async () => {
+    if (!rx) return;
+    setDownloading(true);
+    try {
+      await downloadPrescriptionPdf(rx);
+    } catch {
+      show('Téléchargement impossible pour le moment.', 'error');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   if (!rx) {
     return (
@@ -129,16 +143,8 @@ export default function PrescriptionDetail() {
       <View style={{ marginTop: spacing.l, gap: spacing.s }}>
         {!isDoctor && (
           <>
-            <View style={{ flexDirection: 'row', gap: spacing.s }}>
-              <View style={{ flex: 1 }}>
-                <Button title="Télécharger (PDF)" icon="download" variant="soft" onPress={() => show('Ordonnance téléchargée (simulation).')} fullWidth />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Button title="Partager" icon="share-social" variant="soft" onPress={() => show('Ordonnance partagée (simulation).')} fullWidth />
-              </View>
-            </View>
+            <Button title="Télécharger (PDF)" icon="download" variant="soft" loading={downloading} onPress={download} fullWidth />
             <Button title="Rechercher les médicaments" icon="medkit" onPress={() => router.push('/medications')} fullWidth size="lg" />
-            <Button title="Trouver une pharmacie" icon="medkit" variant="outline" onPress={() => router.push('/pharmacies')} fullWidth />
           </>
         )}
         {isDoctor && (

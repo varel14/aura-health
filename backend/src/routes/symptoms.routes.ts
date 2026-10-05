@@ -12,6 +12,23 @@ const router = Router();
 router.use(requireAuth, requireRole('patient'));
 
 /**
+ * Patient-safe payload: orientation + priority, plus the AI-suggested
+ * specialty when it matches the catalog — enough to point the patient at the
+ * right doctors list, never the physician diagnostic itself.
+ */
+function patientPrep(row: Record<string, unknown>, specialties: Set<string>) {
+  const base = mapSymptomPrep(row as Parameters<typeof mapSymptomPrep>[0]);
+  const diagnostic = row.ai_diagnostic as { recommendedSpecialty?: unknown } | null;
+  const suggested = typeof diagnostic?.recommendedSpecialty === 'string' ? diagnostic.recommendedSpecialty.trim() : '';
+  return { ...base, ...(specialties.has(suggested) ? { suggestedSpecialty: suggested } : {}) };
+}
+
+async function specialtyCatalog(): Promise<Set<string>> {
+  const { rows } = await query<{ name: string }>(`SELECT name FROM specialties`);
+  return new Set(rows.map((r) => r.name));
+}
+
+/**
  * POST /api/symptoms/analyze
  * AI triage via Groq (orientation for the patient + clinical diagnostic stored
  * for the treating physician); falls back to the rule-based triage when the
@@ -45,14 +62,15 @@ router.post('/analyze', route(async (req, res) => {
       fallback.orientation, fallback.priority, Boolean(ai), diagnostic ? JSON.stringify(diagnostic) : null,
     ],
   );
-  // Patient payload: orientation + priority only — the AI diagnostic is
-  // physician-only (exposed through GET /api/doctor/symptom-preps).
-  res.status(201).json(mapSymptomPrep(created!));
+  // Patient payload: orientation + priority + AI specialty suggestion — the
+  // AI diagnostic itself is physician-only (GET /api/doctor/symptom-preps).
+  res.status(201).json(patientPrep(created!, await specialtyCatalog()));
 }));
 
 router.get('/preps', route(async (req, res) => {
+  const specialties = await specialtyCatalog();
   const { rows } = await query(`SELECT * FROM symptom_preps WHERE patient_id = $1 ORDER BY created_at DESC`, [req.user!.patientId]);
-  res.json(rows.map((r) => mapSymptomPrep(r)));
+  res.json(rows.map((r) => patientPrep(r as Record<string, unknown>, specialties)));
 }));
 
 /** POST /api/symptoms/preps/:id/send — shares the prep with the care team. */

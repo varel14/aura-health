@@ -7,7 +7,7 @@ import 'dotenv/config';
 const AI_PROVIDERS = {
   groq: {
     apiKey: process.env.GROQ_API_KEY || '',
-    model: process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
+    model: process.env.GROQ_MODEL ?? 'openai/gpt-oss-120b',
     baseUrl: process.env.GROQ_BASE_URL ?? 'https://api.groq.com/openai/v1',
   },
   glm: {
@@ -21,7 +21,7 @@ const AI_PROVIDER_RAW = process.env.AI_PROVIDER ?? 'groq';
 const AI_PROVIDER: keyof typeof AI_PROVIDERS = AI_PROVIDER_RAW in AI_PROVIDERS ? (AI_PROVIDER_RAW as keyof typeof AI_PROVIDERS) : 'groq';
 
 export const config = {
-  port: Number(process.env.PORT ?? 4000),
+  port: Number(process.env.PORT ?? 4001),
   database: {
     host: process.env.PGHOST ?? '/run/postgresql',
     port: Number(process.env.PGPORT ?? 5432),

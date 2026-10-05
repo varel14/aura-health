@@ -116,7 +116,7 @@ export default function PatientHome() {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.aiTitle}>Vous ne savez pas quel médecin consulter ?</Text>
-          <Text style={styles.aiSub}>Décrivez vos symptômes, nous organisons l’information pour votre médecin.</Text>
+          <Text style={styles.aiSub}>Décrivez vos symptômes : notre IA vous oriente vers la bonne spécialité.</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={colors.ai} />
       </Pressable>

@@ -16,8 +16,11 @@ router.use(requireAuth);
 // ---------------------------------------------------------------------------
 
 const THREAD_SELECT = `
-  SELECT t.*, d.first_name || ' ' || d.last_name AS doctor_name, d.specialty AS doctor_specialty
-  FROM chat_threads t JOIN doctors d ON d.id = t.doctor_id`;
+  SELECT t.*, d.first_name || ' ' || d.last_name AS doctor_name, d.specialty AS doctor_specialty,
+         p.first_name || ' ' || p.last_name AS patient_name
+  FROM chat_threads t
+  JOIN doctors d ON d.id = t.doctor_id
+  JOIN patients p ON p.id = t.patient_id`;
 
 router.get('/threads', route(async (req, res) => {
   const user = req.user!;
@@ -98,6 +101,16 @@ router.post('/threads/:id/end', route(async (req, res) => {
   const endedAt = nowTime();
   await one(`UPDATE chat_threads SET status = 'ended', ended_at = $2 WHERE id = $1`, [thread.id, endedAt]);
   await broadcastToThread(thread.patient_id, thread.doctor_id, 'chat:thread-ended', { threadId: thread.id, endedAt });
+
+  // Closing the conversation closes the consultation itself: the linked
+  // appointment leaves the « à venir » lists (idempotent — a cancelled or
+  // already completed appointment is left untouched).
+  if (thread.appointment_id) {
+    await one(
+      `UPDATE appointments SET status = 'completed' WHERE id = $1 AND status IN ('confirmed', 'pending')`,
+      [thread.appointment_id],
+    );
+  }
 
   // La clôture du fil déclenche la génération (unique) du compte-rendu IA à
   // partir de l'intégralité de l'échange : la requête répond immédiatement, le

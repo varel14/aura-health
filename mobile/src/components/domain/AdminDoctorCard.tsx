@@ -17,7 +17,7 @@ export function AdminDoctorCard({ doctor }: { doctor: AdminDoctor }) {
   return (
     <Pressable
       style={({ pressed }) => [styles.card, pressed && { opacity: 0.85 }]}
-      onPress={() => router.push(`/(admin)/doctors/${doctor.id}`)}
+      onPress={() => router.push(`/(admin)/doctors/review/${doctor.id}`)}
     >
       <View style={styles.cardTop}>
         <Avatar name={`Dr ${doctor.firstName} ${doctor.lastName}`} size={44} />

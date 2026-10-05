@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Button, Card, Chip, Input, Screen, useToast } from '@/components/ui';
+import { Button, Card, Chip, Input, Screen, SectionHeader, useToast } from '@/components/ui';
+import { DoctorRow } from '@/components/domain';
 import { colors, font, radii, spacing } from '@/constants/theme';
 import { useAppData } from '@/context/AppDataContext';
+import { useAsync } from '@/hooks/useAsync';
+import { doctorService } from '@/services';
 
 const symptomOptions = [
   'Fièvre', 'Maux de tête', 'Toux', 'Mal de gorge', 'Douleurs abdominales', 'Nausées / vomissements',
@@ -18,7 +21,7 @@ const evolutions = ['Cela s’améliore', 'Cela reste stable', 'Cela s’aggrave
 type Phase = 'guide' | 'processing' | 'result';
 
 export default function SymptomsGuide() {
-  const { addSymptomPrep, markSymptomPrepSent } = useAppData();
+  const { addSymptomPrep } = useAppData();
   const { show } = useToast();
   const [phase, setPhase] = useState<Phase>('guide');
   const [step, setStep] = useState(0);
@@ -29,9 +32,11 @@ export default function SymptomsGuide() {
   const [evolution, setEvolution] = useState('');
   const [details, setDetails] = useState('');
   const [photoAttached, setPhotoAttached] = useState(false);
-  const [result, setResult] = useState<{ orientation: string; priority: 'faible' | 'modérée' | 'élevée' } | null>(null);
-  const [prepId, setPrepId] = useState<string | null>(null);
-  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<{
+    orientation: string;
+    priority: 'faible' | 'modérée' | 'élevée';
+    suggestedSpecialty?: string;
+  } | null>(null);
 
   const guideSteps = ['Symptômes', 'Durée', 'Intensité', 'Évolution', 'Compléments'];
   const canContinue =
@@ -47,7 +52,7 @@ export default function SymptomsGuide() {
     setPhase('processing');
     try {
       // The server runs the Groq analysis and returns the patient-safe result
-      // (orientation + priority only — the AI diagnostic is physician-only).
+      // (orientation + priority + specialty — the AI diagnostic is physician-only).
       const prep = await addSymptomPrep({
         symptoms,
         duration,
@@ -55,14 +60,21 @@ export default function SymptomsGuide() {
         evolution,
         details: details.trim() || undefined,
       });
-      setResult({ orientation: prep.orientation, priority: prep.priority });
-      setPrepId(prep.id);
+      setResult({ orientation: prep.orientation, priority: prep.priority, suggestedSpecialty: prep.suggestedSpecialty });
       setPhase('result');
     } catch (err) {
       show(err instanceof Error ? err.message : 'Analyse impossible pour le moment.', 'error');
       setPhase('guide');
     }
   };
+
+  // Doctors of the AI-suggested specialty, offered for booking directly on
+  // the result page. Idle (empty list) until an analysis has come back.
+  const specialtyDoctors = useAsync(
+    () => (result?.suggestedSpecialty ? doctorService.list({ specialty: result.suggestedSpecialty }) : Promise.resolve([])),
+    [result?.suggestedSpecialty],
+  );
+  const suggestedDoctorsList = (specialtyDoctors.data ?? []).slice(0, 3);
 
   if (phase === 'processing') {
     return (
@@ -95,6 +107,12 @@ export default function SymptomsGuide() {
             <Text style={styles.resultLabel}>Orientation estimée par l’assistant</Text>
           </View>
           <Text style={styles.resultText}>{result.orientation}</Text>
+          {result.suggestedSpecialty && (
+            <View style={styles.specialtyRow}>
+              <Ionicons name="medical" size={15} color={colors.ai} />
+              <Text style={styles.specialtyText}>Spécialité conseillée : {result.suggestedSpecialty}</Text>
+            </View>
+          )}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: spacing.m }}>
             <View style={[styles.priorityBadge, { backgroundColor: result.priority === 'élevée' ? colors.danger : result.priority === 'modérée' ? colors.warning : colors.success }]}>
               <Text style={styles.priorityText}>Priorité {result.priority}</Text>
@@ -120,30 +138,37 @@ export default function SymptomsGuide() {
           </Text>
         </View>
 
-        <View style={{ marginTop: spacing.l, gap: spacing.s }}>
-          <Button title="Trouver un médecin" icon="search" size="lg" onPress={() => router.push('/doctors')} fullWidth />
-          <Button title="Prendre rendez-vous" icon="calendar" variant="soft" onPress={() => router.push('/doctors')} fullWidth />
-          <Button
-            title="Envoyer à mon médecin (prochain rendez-vous)"
-            icon="send"
-            variant="outline"
-            loading={sending}
-            onPress={async () => {
-              if (!prepId) return;
-              setSending(true);
-              try {
-                await markSymptomPrepSent(prepId);
-                show('Synthèse transmise à votre médecin.');
-                router.back();
-              } catch (err) {
-                show(err instanceof Error ? err.message : 'Envoi impossible.', 'error');
-              } finally {
-                setSending(false);
+        {result.suggestedSpecialty ? (
+          <>
+            <SectionHeader
+              title={`Médecins — ${result.suggestedSpecialty}`}
+              actionLabel="Tout voir"
+              onAction={() =>
+                router.push({ pathname: '/doctors', params: { specialty: result.suggestedSpecialty! } })
               }
-            }}
-            fullWidth
-          />
-        </View>
+              style={{ marginTop: spacing.l, marginBottom: spacing.s }}
+            />
+            {specialtyDoctors.loading ? (
+              <ActivityIndicator color={colors.ai} style={{ paddingVertical: spacing.m }} />
+            ) : suggestedDoctorsList.length > 0 ? (
+              <View style={{ gap: spacing.s }}>
+                {suggestedDoctorsList.map((d) => (
+                  <DoctorRow
+                    key={d.id}
+                    doctor={d}
+                    onPress={() => router.push(`/appointment/book?doctorId=${d.id}`)}
+                  />
+                ))}
+              </View>
+            ) : (
+              <Button title="Prendre rendez-vous" icon="calendar" size="lg" onPress={() => router.push('/doctors')} fullWidth />
+            )}
+          </>
+        ) : (
+          <View style={{ marginTop: spacing.l }}>
+            <Button title="Trouver un médecin" icon="search" size="lg" onPress={() => router.push('/doctors')} fullWidth />
+          </View>
+        )}
       </Screen>
     );
   }
@@ -301,6 +326,8 @@ const styles = StyleSheet.create({
   processStepText: { fontSize: font.size.sm, color: colors.text, fontWeight: '500' },
   resultLabel: { fontSize: font.size.sm, fontWeight: '800', color: colors.ai },
   resultText: { fontSize: font.size.base, color: '#3D2373', fontWeight: '600', marginTop: spacing.s, lineHeight: 23 },
+  specialtyRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: spacing.m },
+  specialtyText: { fontSize: font.size.sm, fontWeight: '800', color: '#4C2889' },
   priorityBadge: { borderRadius: radii.full, paddingHorizontal: 14, paddingVertical: 7 },
   priorityText: { color: colors.white, fontSize: font.size.xs, fontWeight: '800', textTransform: 'uppercase' },
   recapTitle: { fontSize: font.size.base, fontWeight: '800', color: colors.text, marginBottom: 8 },

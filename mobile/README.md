@@ -11,7 +11,7 @@ données et toutes les actions passent par l'API.
 # 1) Le backend (une seule fois : créer la base + jeu de données)
 cd ../backend
 npm install && npm run db:reset
-npm start                      # http://localhost:4000
+npm start                      # http://localhost:4001
 
 # 2) L'application
 cd ../mobile
@@ -19,9 +19,9 @@ npm install
 npx expo start                 # scannez le QR (Expo Go) ou `a` / `i` / `w`
 ```
 
-- **Android émulateur** : l'app joint automatiquement `http://10.0.2.2:4000`.
-- **Web / iOS simulateur** : `http://localhost:4000`.
-- **Appareil physique** : `EXPO_PUBLIC_API_URL=http://<ip-locale>:4000 npx expo start`.
+- **Android émulateur** : l'app joint automatiquement `http://10.0.2.2:4001`.
+- **Web / iOS simulateur** : `http://localhost:4001`.
+- **Appareil physique** : `EXPO_PUBLIC_API_URL=http://<ip-locale>:4001 npx expo start`.
 
 Vérifications : `npm run typecheck` (mobile) · `npm run smoke` (backend) ·
 `npx tsx scripts/contract.ts` (contrat mobile ↔ API, backend démarré requis).

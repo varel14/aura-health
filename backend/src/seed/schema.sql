@@ -349,6 +349,7 @@ CREATE TABLE documents (
   date       DATE NOT NULL,
   source     TEXT NOT NULL DEFAULT 'aura' CHECK (source IN ('aura', 'imported')),
   size_kb    INT NOT NULL DEFAULT 120,
+  deep_link  TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

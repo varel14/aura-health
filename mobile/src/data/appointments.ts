@@ -11,7 +11,7 @@ export const appointments: Appointment[] = [
     type: 'video',
     status: 'confirmed',
     date: todayISO(),
-    time: '15:30',
+    time: '12:00',
     motif: 'Céphalées persistantes et fièvre depuis 4 jours',
     symptoms: ['Maux de tête', 'Fièvre', 'Courbatures', 'Frissons'],
     fee: 10000,

@@ -82,10 +82,11 @@ const TRIAGE_SYSTEM = `Tu es l'assistant médical d'Aura Health, une application
 Règles impératives :
 - « orientation » : message en français destiné AU PATIENT, 2 à 4 phrases, ton chaleureux et rassurant. Il oriente vers un niveau de soins (urgences, consultation sous 24-48h, automédication prudente, pharmacien) mais ne doit JAMAIS citer de maladie, de diagnostic ou d'organe suspect.
 - « priority » : « faible », « modérée » ou « élevée ».
-- « diagnostic » : bloc strictement réservé AU MÉDECIN (synthèse clinique professionnelle, hypothèses diagnostiques différenciées, signes de gravité, spécialité recommandée, questions d'anamnèse à poser, conduite à tenir).
+- « diagnostic » : clé OBLIGATOIRE de la réponse JSON, strictement réservée AU MÉDECIN et donc TOUJOURS renseignée, même en cas d'urgence — c'est précisément là qu'elle est la plus utile : synthèse clinique professionnelle, hypothèses diagnostiques différenciées (dont la plus grave à éliminer), signes de gravité, spécialité recommandée, questions d'anamnèse à poser, conduite à tenir. L'application ne montre JAMAIS ce bloc au patient.
 - En cas de signe d'alerte (douleur thoracique, dyspnée sévère, perte de connaissance, convulsions, saignement abondant, raideur de nuque avec fièvre), priority = « élevée » et l'orientation envoie aux urgences ou au 112.
 - Contexte local : le paludisme est endémique — évoque le TDR/goutte épaisse dans les examens quand la fièvre est en jeu.
-- Réponds UNIQUEMENT avec un objet JSON valide, sans texte autour.`;
+- Réponds UNIQUEMENT avec un objet JSON valide, sans texte autour :
+{"orientation":"","priority":"","diagnostic":{"summary":"","possibleConditions":[{"name":"","likelihood":"faible|moyenne|élevée"}],"redFlags":[""],"recommendedSpecialty":"","questions":[""],"urgencyNote":""}}`;
 
 /** Analyzes declared symptoms via Groq. Returns null when Groq is unavailable. */
 export async function analyzeSymptomsAi(
@@ -144,9 +145,9 @@ const SUMMARY_SYSTEM = `Tu es l'assistant de compte-rendu d'Aura Health. À part
 Règles impératives :
 - Les champs « observations », « importantInfo », « recommendations », « treatments », « exams », « nextSteps » sont destinés AU PATIENT : clairs, factuels, en français, sans poser de diagnostic ni citer d'hypothèse diagnostique (l'observation décrit la visite, les symptômes rapportés et la conduite adoptée).
 - Quand une transcription de l'échange par messagerie est fournie, base tout le compte-rendu et le bloc « diagnostic » sur l'intégralité de cet échange : symptômes et précisions rapportés par le patient, questions et conseils du médecin, traitements décidés. Ne reinvente rien qui ne figure pas dans l'échange ou les données de la consultation.
-- « treatments » : uniquement les médicaments réellement justifiés par la consultation (peut être vide). Format : nom, dosage, fréquence, durée, forme (comprimé, sirop…), quantité.
+- « treatments » : TOUJOURS renseigné pour une consultation qui justifie un traitement. Si l'échange ou les notes du médecin mentionnent un traitement, reprends-le tel quel. Sinon, quand l'état du patient justifie un soulagement symptomatique, propose un traitement symptomatique prudent et standard (ex. paracétamol pour fièvre ou douleurs), présenté comme à ajuster par le médecin. Ne laisse « treatments » vide QUE si aucun médicament n'est pertinent (ex. simple conseil de mode de vie).
 - « exams » : examens complémentaires à envisager (le TDR paludisme / goutte épaisse en cas de fièvre, contexte camerounais).
-- « diagnostic » : bloc strictement réservé AU MÉDECIN — hypothèse diagnostique principale, diagnostics différentiels, sévérité, suivi souhaité.
+- « diagnostic » : clé OBLIGATOIRE, strictement réservée AU MÉDECIN et TOUJOURS renseignée — hypothèse diagnostique principale, diagnostics différentiels, sévérité, suivi souhaité. L'application ne montre JAMAIS ce bloc au patient.
 - Réponds UNIQUEMENT avec un objet JSON valide :
 {"importantInfo":["..."],"observations":"...","recommendations":["..."],"treatments":[{"name":"","dosage":"","frequency":"","duration":"","form":"","quantity":""}],"exams":["..."],"nextSteps":["..."],"diagnostic":{"hypothesis":"","differentials":[""],"severity":"","followUp":""}}`;
 

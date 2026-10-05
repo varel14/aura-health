@@ -12,7 +12,7 @@ symptom triage and the doctor workspace.
 npm install
 cp .env.example .env            # adjust PGUSER/PGHOST if needed
 npm run db:reset                # drop + recreate schema + seed from mock data
-npm start                       # http://localhost:4000  (npm run dev = watch mode)
+npm start                       # http://localhost:4001  (npm run dev = watch mode)
 ```
 
 ### AI (Groq or GLM)

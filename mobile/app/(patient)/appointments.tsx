@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -51,21 +51,25 @@ export default function AppointmentsTab() {
         </View>
       </View>
 
-      {list.length === 0 ? (
-        <EmptyState
-          icon="calendar-outline"
-          title={tab === 'upcoming' ? 'Aucun rendez-vous à venir' : 'Aucun rendez-vous passé'}
-          message={
-            tab === 'upcoming'
-              ? 'Prenez rendez-vous avec un médecin en quelques minutes, en vidéo, par chat ou en présentiel.'
-              : 'Vos consultations terminées et annulées apparaîtront ici.'
-          }
-          actionLabel={tab === 'upcoming' ? 'Trouver un médecin' : undefined}
-          onAction={tab === 'upcoming' ? () => router.push('/doctors') : undefined}
-        />
-      ) : (
-        <View style={{ paddingHorizontal: spacing.m, gap: spacing.s, flex: 1 }}>
-          {list.map((a) => {
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: spacing.m, paddingBottom: 40, gap: spacing.s }}
+      >
+        {list.length === 0 ? (
+          <EmptyState
+            icon="calendar-outline"
+            title={tab === 'upcoming' ? 'Aucun rendez-vous à venir' : 'Aucun rendez-vous passé'}
+            message={
+              tab === 'upcoming'
+                ? 'Prenez rendez-vous avec un médecin en quelques minutes, en vidéo, par chat ou en présentiel.'
+                : 'Vos consultations terminées et annulées apparaîtront ici.'
+            }
+            actionLabel={tab === 'upcoming' ? 'Trouver un médecin' : undefined}
+            onAction={tab === 'upcoming' ? () => router.push('/doctors') : undefined}
+          />
+        ) : (
+          list.map((a) => {
             const info = doctorInfo(a.doctorId);
             return (
               <AppointmentCard
@@ -76,10 +80,9 @@ export default function AppointmentsTab() {
                 onPress={() => router.push(`/appointment/${a.id}`)}
               />
             );
-          })}
-          <View style={{ height: 30 }} />
-        </View>
-      )}
+          })
+        )}
+      </ScrollView>
     </View>
   );
 }

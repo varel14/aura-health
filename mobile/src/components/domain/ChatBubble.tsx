@@ -59,6 +59,28 @@ export function ChatBubble({
     );
   }
 
+  if (message.kind === 'audio') {
+    return (
+      <View style={[styles.wrap, flat && styles.wrapFlat, mine ? styles.wrapMine : styles.wrapTheirs]}>
+        <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
+          <View style={styles.fileRow}>
+            <View style={[styles.fileIcon, { backgroundColor: colors.primarySoft }]}>
+              <Ionicons name="play" size={20} color={colors.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.mediaTitle} numberOfLines={1}>Message vocal</Text>
+              <Text style={styles.mediaSub}>{message.audioDuration ?? 'Lecture impossible'}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+          </View>
+          <View style={styles.metaRow}>
+            <Text style={styles.timeInline}>{message.time}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   if (message.kind === 'prescription') {
     return (
       <View style={[styles.wrap, flat && styles.wrapFlat, mine ? styles.wrapMine : styles.wrapTheirs]}>

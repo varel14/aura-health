@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -6,8 +6,10 @@ import { Badge, Button, Card, ErrorState, Screen, SectionHeader, useToast } from
 import { colors, font, radii, spacing } from '@/constants/theme';
 import { medicationService, pharmacyService } from '@/services';
 import { useAsync } from '@/hooks/useAsync';
+import { useLocation } from '@/hooks/useLocation';
 import { useAppData } from '@/context/AppDataContext';
 import { fcfa } from '@/utils/format';
+import { formatDistance, haversineKm } from '@/utils/geo';
 
 export default function MedicationDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -16,6 +18,17 @@ export default function MedicationDetail() {
   const [quantity, setQuantity] = useState(1);
   const { data: med, loading, error, reload } = useAsync(() => medicationService.get(id), [id]);
   const pharmacies = useAsync(() => pharmacyService.list({ medicationId: id }), [id]);
+  const { coords, status: locationStatus, retry: retryLocation } = useLocation();
+
+  // Single proposal: the pharmacy stocking the medication closest to the
+  // patient (rating-ordered first when the position is unknown).
+  const nearest = useMemo(() => {
+    const list = pharmacies.data ?? [];
+    if (list.length === 0) return null;
+    if (!coords) return list[0];
+    return [...list].sort((a, b) => haversineKm(coords, a) - haversineKm(coords, b))[0];
+  }, [pharmacies.data, coords]);
+  const nearestDistanceKm = nearest && coords ? haversineKm(coords, nearest) : null;
 
   if (loading) {
     return (
@@ -86,28 +99,36 @@ export default function MedicationDetail() {
         </View>
       )}
 
-      <SectionHeader
-        title={`Pharmacies proposant ce médicament (${(pharmacies.data ?? []).length})`}
-        style={{ paddingHorizontal: 0 }}
-      />
+      <SectionHeader title="Pharmacie la plus proche" style={{ paddingHorizontal: 0 }} />
       {pharmacies.loading ? (
         <ActivityIndicator color={colors.primary} style={{ paddingVertical: spacing.m }} />
-      ) : (
-        <View style={{ gap: spacing.s }}>
-          {(pharmacies.data ?? []).map((p) => (
-            <Card key={p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.m }}>
+      ) : nearest ? (
+        <>
+          <Pressable onPress={() => router.push(`/pharmacies/${nearest.id}`)}>
+            <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.m }}>
               <View style={styles.phIcon}>
                 <Ionicons name="medkit" size={18} color={colors.warning} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.phName}>{p.name}</Text>
-                <Text style={styles.phSub}>{p.district}, {p.city}</Text>
+                <Text style={styles.phName}>{nearest.name}</Text>
+                <Text style={styles.phSub}>
+                  {nearest.district}, {nearest.city}
+                  {nearestDistanceKm !== null ? ` — à ${formatDistance(nearestDistanceKm)}` : ''}
+                </Text>
               </View>
-              {p.onDuty && <Badge label="De garde" variant="success" size="sm" />}
+              {nearest.onDuty && <Badge label="De garde" variant="success" size="sm" />}
               <Ionicons name="chevron-forward" size={17} color={colors.textFaint} />
             </Card>
-          ))}
-        </View>
+          </Pressable>
+          {locationStatus === 'denied' || locationStatus === 'unavailable' ? (
+            <Pressable onPress={retryLocation} style={styles.locHint}>
+              <Ionicons name="location-outline" size={13} color={colors.textFaint} />
+              <Text style={styles.locHintText}>Activer la localisation pour afficher la distance.</Text>
+            </Pressable>
+          ) : null}
+        </>
+      ) : (
+        <Text style={styles.noPharmacy}>Aucune pharmacie ne propose ce médicament pour le moment.</Text>
       )}
 
       <View style={{ marginTop: spacing.l }}>
@@ -198,6 +219,9 @@ const styles = StyleSheet.create({
   },
   phName: { fontSize: font.size.base, fontWeight: '700', color: colors.text },
   phSub: { fontSize: font.size.xs, color: colors.textMuted, marginTop: 1 },
+  locHint: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: spacing.s },
+  locHintText: { fontSize: font.size.xs, color: colors.textFaint },
+  noPharmacy: { fontSize: font.size.sm, color: colors.textMuted },
   qtyLabel: { fontSize: font.size.base, fontWeight: '700', color: colors.text },
   qtyBtn: {
     width: 36,

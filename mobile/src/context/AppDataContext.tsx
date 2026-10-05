@@ -56,7 +56,6 @@ interface AppDataContextValue {
   markAllNotificationsRead: () => Promise<void>;
   addMessage: (threadId: string, msg: Omit<ChatMessage, 'id' | 'threadId'>) => Promise<ChatMessage>;
   endThread: (threadId: string) => Promise<void>;
-  addSummary: (s: ConsultationSummary) => Promise<ConsultationSummary>;
   addDocument: (d: Omit<MedicalDocument, 'id'>) => Promise<MedicalDocument>;
   addSymptomPrep: (p: Omit<SymptomPrep, 'id' | 'createdAt' | 'sentToDoctor' | 'orientation' | 'priority'>) => Promise<SymptomPrep>;
   markSymptomPrepSent: (id: string) => Promise<void>;
@@ -357,17 +356,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
               : t,
           ),
         );
-      },
-
-      // The server generates the full compte-rendu (observations, prescription,
-      // document) from the appointment; the draft only carries the appointmentId.
-      addSummary: async (s) => {
-        const created = await api<ConsultationSummary>('/api/consultations/summaries', {
-          method: 'POST',
-          body: { appointmentId: s.appointmentId },
-        });
-        setSummaries((list) => [created, ...list.filter((x) => x.id !== created.id)]);
-        return created;
+        // Ending the conversation also completes the linked appointment
+        // server-side — re-pull so both parties' agendas show « terminé ».
+        void refresh();
       },
 
       addDocument: async (d) => {

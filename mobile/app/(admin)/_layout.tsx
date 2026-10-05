@@ -39,8 +39,10 @@ export default function AdminLayout() {
         name="profile"
         options={{ title: 'Admin', tabBarIcon: ({ color, focused }) => <TabBarIcon name="shield-half" color={color} focused={focused} /> }}
       />
-      {/* Detail routes live outside the tab bar. */}
-      <Tabs.Screen name="doctors/[id]" options={{ href: null }} />
+      {/* Detail routes live outside the tab bar. Must stay off the public
+          /doctors/[id] URL — same-shaped routes would make the router pick
+          one arbitrarily for deep links. */}
+      <Tabs.Screen name="doctors/review/[id]" options={{ href: null }} />
     </Tabs>
   );
 }

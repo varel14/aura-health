@@ -107,8 +107,8 @@ export async function seedDatabase(pool: Pool) {
   );
 
   for (const doc of medicalDocuments)
-    await q(`INSERT INTO documents (id, patient_id, name, type, date, source, size_kb) VALUES ($1,$2,$3,$4,$5,$6,$7)`, [
-      doc.id, patient.id, doc.name, doc.type, doc.date, doc.source, doc.sizeKb,
+    await q(`INSERT INTO documents (id, patient_id, name, type, date, source, size_kb, deep_link) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`, [
+      doc.id, patient.id, doc.name, doc.type, doc.date, doc.source, doc.sizeKb, doc.deepLink ?? null,
     ]);
 
   // -- Doctor-side patient files (all belong to the demo doctor) -------------
@@ -255,7 +255,7 @@ export async function seedDatabase(pool: Pool) {
     await q(
       `INSERT INTO chat_threads (id, appointment_id, doctor_id, patient_id, status, ended_at)
        VALUES ($1,$2,$3,$4,$5,$6)`,
-      [t.id, t.appointmentId ?? null, t.doctorId, patient.id, t.status, t.endedAt ?? null],
+      [t.id, t.appointmentId ?? null, t.doctorId, t.patientId ?? patient.id, t.status, t.endedAt ?? null],
     );
     for (let i = 0; i < t.messages.length; i++) {
       const m = t.messages[i];

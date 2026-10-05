@@ -8,7 +8,7 @@
  * Walks every product flow and exits non-zero if any step fails.
  */
 
-const BASE = process.env.SMOKE_BASE ?? 'http://localhost:4000';
+const BASE = process.env.SMOKE_BASE ?? 'http://localhost:4001';
 
 let passed = 0;
 let failed = 0;

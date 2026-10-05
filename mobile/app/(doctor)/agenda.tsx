@@ -57,24 +57,27 @@ export default function DoctorAgenda() {
         </View>
       </View>
 
-      {items.length === 0 ? (
-        <EmptyState
-          icon="calendar-outline"
-          title="Journée sans consultation"
-          message="Aucun rendez-vous n’est prévu à cette date. Les patients peuvent toutefois demander des créneaux."
-        />
-      ) : (
-        <View style={{ paddingHorizontal: spacing.m, marginTop: spacing.s, gap: spacing.s, flex: 1 }}>
-          {items.map((a) => (
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: spacing.m, paddingTop: spacing.s, paddingBottom: 40, gap: spacing.s }}
+      >
+        {items.length === 0 ? (
+          <EmptyState
+            icon="calendar-outline"
+            title="Journée sans consultation"
+            message="Aucun rendez-vous n’est prévu à cette date. Les patients peuvent toutefois demander des créneaux."
+          />
+        ) : (
+          items.map((a) => (
             <PatientAppointmentRow
               key={a.id}
               appointment={a}
               onPress={() => router.push(`/appointment/${a.id}`)}
             />
-          ))}
-          <View style={{ height: 30 }} />
-        </View>
-      )}
+          ))
+        )}
+      </ScrollView>
     </View>
   );
 }

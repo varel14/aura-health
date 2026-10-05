@@ -34,7 +34,7 @@ export async function chatJson<T>(system: string, user: string): Promise<T | nul
       body: JSON.stringify({
         model: config.ai.model,
         temperature: 0.2,
-        max_tokens: 1600,
+        max_tokens: 4096,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: system },

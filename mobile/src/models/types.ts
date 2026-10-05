@@ -69,6 +69,8 @@ export interface MedicalDocument {
   date: string;
   source: 'aura' | 'imported';
   sizeKb: number;
+  /** In-app screen rendering the document content (prescription, summary…). */
+  deepLink?: string;
 }
 
 export interface Doctor {
@@ -209,6 +211,8 @@ export interface ChatMessage {
   audioDuration?: string;
   prescriptionId?: string;
   time: string; // HH:mm
+  /** Local day of the message (yyyy-mm-dd) — drives the chat date separators. */
+  date?: string;
 }
 
 export interface ChatThread {
@@ -217,6 +221,9 @@ export interface ChatThread {
   doctorId: string;
   doctorName: string;
   doctorSpecialty: string;
+  patientId?: string;
+  /** Counterpart name — lets a doctor session address its patients. */
+  patientName?: string;
   status: 'active' | 'ended';
   endedAt?: string;
   messages: ChatMessage[];
@@ -413,6 +420,9 @@ export interface SymptomPrep {
   orientation: string;
   priority: 'faible' | 'modérée' | 'élevée';
   aiGenerated?: boolean;
+  /** AI-suggested specialty (catalog-validated) to drive the orientation CTA;
+   *  absent when the analysis ran on the local fallback engine. */
+  suggestedSpecialty?: string;
   /** Present only in doctor sessions (see AiDiagnostic). */
   aiDiagnostic?: AiDiagnostic;
   /** Present only in the doctor workspace listing (who sent the prep). */

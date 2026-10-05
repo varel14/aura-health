@@ -1,5 +1,5 @@
 import { Appointment } from './types.js';
-import { soonISO, todayISO } from './format.js';
+import { todayISO } from './format.js';
 import { doctorDayAppointments, doctorPatients } from './doctorPatients.js';
 
 const patientFile = (id: string) => doctorPatients.find((p) => p.id === id)!;
@@ -8,7 +8,7 @@ const patientFile = (id: string) => doctorPatients.find((p) => p.id === id)!;
  * Agenda du Dr Mbarga (d1) — le compte démo médecin doit démarrer avec une
  * journée et un historique réels. Ces lignes référencent les dossiers dp*
  * (visibles côté médecin uniquement) : elles n'apparaissent jamais dans la
- * liste du patient démo, sauf appt9 qui est son propre RDV chat.
+ * liste du patient démo.
  */
 const doctorAgenda: Appointment[] = [
   ...doctorDayAppointments
@@ -31,22 +31,6 @@ const doctorAgenda: Appointment[] = [
         paid: d.status !== 'pending',
       }),
     ),
-  {
-    id: 'appt9',
-    doctorId: 'd1',
-    patientId: 'p1',
-    patientName: 'Stéphane Nkodo',
-    patientAge: 34,
-    type: 'chat',
-    status: 'pending',
-    date: todayISO(),
-    time: '12:00',
-    motif: 'Envoi des résultats du TDR paludisme',
-    symptoms: [],
-    fee: 7000,
-    establishment: 'Centre Médical de Bastos',
-    paid: false,
-  },
   {
     id: 'dap7',
     doctorId: 'd1',
@@ -139,7 +123,7 @@ export const appointments: Appointment[] = [
     type: 'video',
     status: 'confirmed',
     date: todayISO(),
-    time: '15:30',
+    time: '12:00',
     motif: 'Céphalées persistantes et fièvre depuis 4 jours',
     symptoms: ['Maux de tête', 'Fièvre', 'Courbatures', 'Frissons'],
     fee: 10000,
@@ -264,28 +248,5 @@ export const appointments: Appointment[] = [
     paid: true,
     paymentId: 'pay6',
   },
-  // -- RDV vidéo imminents (test de la consultation vidéo à deux) ------------
-  // Heures calculées au moment du seed : dans 2 min, puis un second créneau
-  // dans 5 min en secours. Les deux comptes démo (patient & Dr Mbarga) peuvent
-  // rejoindre chacun leur tour ; relancer `npm run db:reset` rafraîchit l'heure.
-  ...[2, 5].map((inMinutes, i): Appointment => {
-    const when = soonISO(inMinutes);
-    return {
-      id: i === 0 ? 'appt10' : 'appt11',
-      doctorId: 'd1',
-      patientId: 'p1',
-      patientName: 'Stéphane Nkodo',
-      patientAge: 34,
-      type: 'video',
-      status: 'confirmed',
-      date: when.date,
-      time: when.time,
-      motif: i === 0 ? 'Test — consultation vidéo immédiate' : 'Test — consultation vidéo (créneau de secours)',
-      symptoms: [],
-      fee: 10000,
-      establishment: 'Centre Médical de Bastos',
-      paid: true,
-    };
-  }),
   ...doctorAgenda,
 ];

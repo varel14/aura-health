@@ -60,12 +60,19 @@ router.post('/', route(async (req, res) => {
     [id, doctor.id, patientId, `${patient.first_name} ${patient.last_name}`, ageFrom(toDateOnly(patient.birth_date)), type, date, time, motif, JSON.stringify(symptoms), fee, establishment],
   );
 
-  // A chat consultation opens its message thread right away.
+  // A (patient, doctor) pair shares one continuous conversation: booking a new
+  // chat consultation reopens the existing thread — history is kept, the
+  // thread attaches to the latest appointment and becomes active again.
   if (type === 'chat') {
-    await one(
-      `INSERT INTO chat_threads (id, appointment_id, doctor_id, patient_id) VALUES ($1,$2,$3,$4)`,
-      [newId('th'), id, doctor.id, patientId],
-    );
+    const existing = await one(`SELECT id FROM chat_threads WHERE patient_id = $1 AND doctor_id = $2`, [patientId, doctor.id]);
+    if (existing) {
+      await one(`UPDATE chat_threads SET appointment_id = $2, status = 'active', ended_at = NULL WHERE id = $1`, [existing.id, id]);
+    } else {
+      await one(
+        `INSERT INTO chat_threads (id, appointment_id, doctor_id, patient_id) VALUES ($1,$2,$3,$4)`,
+        [newId('th'), id, doctor.id, patientId],
+      );
+    }
   }
 
   await notify({

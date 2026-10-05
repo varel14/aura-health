@@ -4,7 +4,7 @@
  * live backend:  npx tsx scripts/contract.ts
  * (pure fetch — no react-native imports).
  */
-const BASE = process.env.CONTRACT_BASE ?? 'http://localhost:4000';
+const BASE = process.env.CONTRACT_BASE ?? 'http://localhost:4001';
 
 let passed = 0;
 let failed = 0;

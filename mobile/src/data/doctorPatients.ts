@@ -111,7 +111,7 @@ export const doctorDayAppointments = [
   { id: 'dap1', time: '08:00', patient: 'Aline Fouda', type: 'in-person' as const, motif: 'Fatigue chronique et vertiges', status: 'completed' as const, patientId: 'dp2' },
   { id: 'dap2', time: '10:00', patient: 'Marc Ekani', type: 'chat' as const, motif: 'Renouvellement traitement hypertension', status: 'completed' as const, patientId: 'dp3' },
   { id: 'dap3', time: '11:00', patient: 'Fatima Djibril', type: 'in-person' as const, motif: 'Consultation prénatale', status: 'completed' as const, patientId: 'dp6' },
-  { id: 'appt1', time: '15:30', patient: 'Stéphane Nkodo', type: 'video' as const, motif: 'Céphalées persistantes et fièvre depuis 4 jours', status: 'confirmed' as const, patientId: 'p1' },
+  { id: 'appt1', time: '12:00', patient: 'Stéphane Nkodo', type: 'video' as const, motif: 'Céphalées persistantes et fièvre depuis 4 jours', status: 'confirmed' as const, patientId: 'p1' },
   { id: 'dap5', time: '16:15', patient: 'Grâce Njonang', type: 'video' as const, motif: 'Crises de migraine fréquentes', status: 'confirmed' as const, patientId: 'dp4' },
   { id: 'dap6', time: '17:00', patient: 'Yannick Tagne', type: 'in-person' as const, motif: 'Contrôle asthme', status: 'pending' as const, patientId: 'dp5' },
 ];

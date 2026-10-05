@@ -63,6 +63,7 @@ export interface MedicalDocument {
   date: string;
   source: 'aura' | 'imported';
   sizeKb: number;
+  deepLink?: string;
 }
 
 export interface Doctor {
@@ -211,6 +212,8 @@ export interface ChatThread {
   doctorId: string;
   doctorName: string;
   doctorSpecialty: string;
+  /** Patient row owning the thread — defaults to the demo patient when unset. */
+  patientId?: string;
   status: 'active' | 'ended';
   endedAt?: string;
   messages: ChatMessage[];

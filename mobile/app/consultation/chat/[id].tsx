@@ -1,21 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Avatar, Button, useToast } from '@/components/ui';
+import { Avatar, Button, ErrorState, Screen, useToast } from '@/components/ui';
 import { ChatBubble } from '@/components/domain/ChatBubble';
 import { colors, font, radii, spacing } from '@/constants/theme';
 import { useAppData } from '@/context/AppDataContext';
 import { useAuth } from '@/context/AuthContext';
-import { nowTime } from '@/utils/format';
+import { fullDate, nowTime, todayISO } from '@/utils/format';
 
 // Chat wallpaper, kept close to the brand like WhatsApp's tinted doodle cloth.
 const CHAT_BG = '#F2F0F6';
 
 export default function ConsultationChat() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { threads, addMessage, endThread, summaries } = useAppData();
+  const { threads, hydrating, addMessage, endThread, summaries } = useAppData();
   const { role } = useAuth();
   const { show } = useToast();
   const insets = useSafeAreaInsets();
@@ -26,10 +26,6 @@ export default function ConsultationChat() {
   const isPatient = role !== 'doctor';
   const ended = thread?.status === 'ended';
   const hasSummary = thread?.appointmentId ? summaries.some((s) => s.appointmentId === thread.appointmentId) : false;
-
-  useEffect(() => {
-    if (!thread) router.back();
-  }, [thread]);
 
   const scrollToEnd = (animated = true) => {
     requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated }));
@@ -42,7 +38,31 @@ export default function ConsultationChat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [thread?.id]);
 
-  if (!thread) return null;
+  // No router.back() effect here: on a deep link the threads are still loading
+  // and navigating this early crashes expo-router. The branch below waits for
+  // the initial sync, then shows an error state the user can leave from.
+  if (!thread) {
+    return (
+      <Screen title="Conversation" onBack={() => router.back()}>
+        {hydrating ? (
+          <ActivityIndicator color={colors.primary} style={{ marginTop: 120 }} />
+        ) : (
+          <ErrorState message="Cette conversation n’existe pas ou n’est plus accessible." />
+        )}
+      </Screen>
+    );
+  }
+
+  // Each side sees its counterpart: patients see the doctor, doctors see the patient.
+  const counterpartName = isPatient ? thread.doctorName : thread.patientName ?? 'Patient';
+
+  // Date separators follow the real message days, not a hardcoded label.
+  const dayChipLabel = (date?: string) => {
+    if (!date) return null;
+    if (date === todayISO()) return 'Aujourd’hui';
+    if (date === todayISO(-1)) return 'Hier';
+    return fullDate(date);
+  };
 
   // Messages persist through POST /api/consultations/threads/:id/messages —
   // the server derives the sender from the session role.
@@ -77,11 +97,11 @@ export default function ConsultationChat() {
           <Ionicons name="chevron-back" size={22} color={colors.text} />
         </Pressable>
         <View>
-          <Avatar name={thread.doctorName} size={40} />
+          <Avatar name={counterpartName} size={40} />
           {!ended && <View style={styles.presenceDot} />}
         </View>
         <View style={{ flex: 1, marginLeft: spacing.s }}>
-          <Text style={styles.headerName} numberOfLines={1}>{thread.doctorName}</Text>
+          <Text style={styles.headerName} numberOfLines={1}>{counterpartName}</Text>
           <View style={styles.headerStatusRow}>
             {ended ? (
               <Text style={styles.headerSub}>Consultation terminée</Text>
@@ -91,7 +111,7 @@ export default function ConsultationChat() {
                 <Text style={[styles.headerSub, { color: colors.success }]}>En ligne</Text>
               </>
             )}
-            <Text style={styles.headerSub}> • {thread.doctorSpecialty}</Text>
+            {!isPatient && <Text style={styles.headerSub}> • Consultation par messagerie</Text>}
           </View>
         </View>
         {!ended && (
@@ -114,21 +134,25 @@ export default function ConsultationChat() {
             onContentSizeChange={() => scrollToEnd()}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={styles.dateChip}>
-              <Text style={styles.dateChipText}>Aujourd’hui</Text>
-            </View>
             {thread.messages.map((m, i) => {
               const prev = thread.messages[i - 1];
-              const sameSenderAsPrev = prev && prev.sender === m.sender && prev.kind !== 'system';
+              const newDay = m.date !== undefined && prev?.date !== m.date;
+              const sameSenderAsPrev = prev && prev.sender === m.sender && prev.kind !== 'system' && !newDay;
               const groupedWithNext = thread.messages[i + 1]?.sender === m.sender;
               return (
-                <ChatBubble
-                  key={m.id}
-                  message={m}
-                  isPatient={isPatient}
-                  showTail={!sameSenderAsPrev}
-                  flat={groupedWithNext}
-                />
+                <Fragment key={m.id}>
+                  {newDay && (
+                    <View style={styles.dateChip}>
+                      <Text style={styles.dateChipText}>{dayChipLabel(m.date)}</Text>
+                    </View>
+                  )}
+                  <ChatBubble
+                    message={m}
+                    isPatient={isPatient}
+                    showTail={!sameSenderAsPrev}
+                    flat={groupedWithNext}
+                  />
+                </Fragment>
               );
             })}
             {ended && (

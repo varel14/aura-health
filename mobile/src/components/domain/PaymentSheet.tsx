@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheet } from '../ui/BottomSheet';
 import { Input } from '../ui/Input';
@@ -77,60 +77,65 @@ export function PaymentSheet({
     <BottomSheet visible={visible} onClose={() => { onClose(); reset(); }} title={phase === 'select' ? 'Paiement sécurisé' : undefined} height="88%">
       {phase === 'select' && (
         <View style={{ flex: 1 }}>
-          <View style={styles.amountCard}>
-            <Text style={styles.amountLabel}>Montant à payer</Text>
-            <Text style={styles.amount}>{fcfa(amount)}</Text>
-            <Text style={styles.amountSub}>{label}</Text>
-          </View>
+          {/* Scrollable form area — the sheet is height-capped, and with the
+              card method selected the inputs overflow it on small screens. */}
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: spacing.s }}>
+            <View style={styles.amountCard}>
+              <Text style={styles.amountLabel}>Montant à payer</Text>
+              <Text style={styles.amount}>{fcfa(amount)}</Text>
+              <Text style={styles.amountSub}>{label}</Text>
+            </View>
 
-          <Text style={styles.sectionTitle}>Moyen de paiement</Text>
-          {methods.map((m) => (
-            <Pressable
-              key={m.id}
-              onPress={() => setMethod(m.id)}
-              style={[styles.method, method === m.id && styles.methodSelected]}
-            >
-              <View style={[styles.methodIcon, { backgroundColor: `${m.tint}22` }]}>
-                <Ionicons name={m.icon} size={20} color={m.tint} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.methodName}>{m.name}</Text>
-                <Text style={styles.methodSub}>{m.sub}</Text>
-              </View>
-              {method === m.id ? (
-                <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
-              ) : (
-                <View style={styles.radio} />
-              )}
-            </Pressable>
-          ))}
-
-          {method === 'card' ? (
-            <View style={{ marginTop: spacing.s }}>
-              <Input label="Numéro de carte" placeholder="4242 4242 4242 4242" keyboardType="number-pad" value={cardNumber} onChangeText={setCardNumber} leftIcon="card" />
-              <View style={{ flexDirection: 'row', gap: spacing.s }}>
-                <View style={{ flex: 1 }}>
-                  <Input label="Expiration" placeholder="MM/AA" keyboardType="number-pad" value={cardExp} onChangeText={setCardExp} />
+            <Text style={styles.sectionTitle}>Moyen de paiement</Text>
+            {methods.map((m) => (
+              <Pressable
+                key={m.id}
+                onPress={() => setMethod(m.id)}
+                style={[styles.method, method === m.id && styles.methodSelected]}
+              >
+                <View style={[styles.methodIcon, { backgroundColor: `${m.tint}22` }]}>
+                  <Ionicons name={m.icon} size={20} color={m.tint} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Input label="CVV" placeholder="123" keyboardType="number-pad" secureTextEntry value={cardCvv} onChangeText={setCardCvv} />
+                  <Text style={styles.methodName}>{m.name}</Text>
+                  <Text style={styles.methodSub}>{m.sub}</Text>
+                </View>
+                {method === m.id ? (
+                  <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
+                ) : (
+                  <View style={styles.radio} />
+                )}
+              </Pressable>
+            ))}
+
+            {method === 'card' ? (
+              <View style={{ marginTop: spacing.s }}>
+                <Input label="Numéro de carte" placeholder="4242 4242 4242 4242" keyboardType="number-pad" value={cardNumber} onChangeText={setCardNumber} leftIcon="card" />
+                <View style={{ flexDirection: 'row', gap: spacing.s }}>
+                  <View style={{ flex: 1 }}>
+                    <Input label="Expiration" placeholder="MM/AA" keyboardType="number-pad" value={cardExp} onChangeText={setCardExp} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Input label="CVV" placeholder="123" keyboardType="number-pad" secureTextEntry value={cardCvv} onChangeText={setCardCvv} />
+                  </View>
                 </View>
               </View>
-            </View>
-          ) : (
-            <View style={{ marginTop: spacing.s }}>
-              <Input
-                label={method === 'mtn_momo' ? 'Numéro MTN Mobile Money' : 'Numéro Orange Money'}
-                leftIcon="call"
-                keyboardType="phone-pad"
-                value={phone}
-                onChangeText={setPhone}
-                hint="Vous recevrez une demande de confirmation sur votre téléphone (simulation)."
-              />
-            </View>
-          )}
+            ) : (
+              <View style={{ marginTop: spacing.s }}>
+                <Input
+                  label={method === 'mtn_momo' ? 'Numéro MTN Mobile Money' : 'Numéro Orange Money'}
+                  leftIcon="call"
+                  keyboardType="phone-pad"
+                  value={phone}
+                  onChangeText={setPhone}
+                  hint="Vous recevrez une demande de confirmation sur votre téléphone (simulation)."
+                />
+              </View>
+            )}
+          </ScrollView>
 
-          <View style={{ flex: 1, justifyContent: 'flex-end', gap: spacing.s }}>
+          {/* Actions stay pinned below the scroll area. */}
+          <View style={{ gap: spacing.s, paddingTop: spacing.s }}>
             <Pressable onPress={() => setPhase('failed')} style={styles.failSim}>
               <Text style={styles.failSimText}>Simuler un échec de paiement (démo)</Text>
             </Pressable>

@@ -14,7 +14,7 @@ function DoctorRow({ doctor }: { doctor: AdminDoctor }) {
   return (
     <Pressable
       style={({ pressed }) => [styles.docRow, pressed && { opacity: 0.8 }]}
-      onPress={() => router.push(`/(admin)/doctors/${doctor.id}`)}
+      onPress={() => router.push(`/(admin)/doctors/review/${doctor.id}`)}
     >
       <Avatar name={`Dr ${doctor.firstName} ${doctor.lastName}`} size={42} />
       <View style={{ flex: 1, marginLeft: spacing.s }}>

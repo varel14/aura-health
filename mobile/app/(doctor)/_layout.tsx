@@ -32,6 +32,10 @@ export default function DoctorLayout() {
         options={{ title: 'Patients', tabBarIcon: ({ color, focused }) => <TabBarIcon name="people" color={color} focused={focused} /> }}
       />
       <Tabs.Screen
+        name="messages"
+        options={{ title: 'Messages', tabBarIcon: ({ color, focused }) => <TabBarIcon name="chatbubbles" color={color} focused={focused} /> }}
+      />
+      <Tabs.Screen
         name="doctor-profile"
         options={{ title: 'Profil', tabBarIcon: ({ color, focused }) => <TabBarIcon name="person" color={color} focused={focused} /> }}
       />

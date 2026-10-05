@@ -169,6 +169,7 @@ export function mapThread(r: Row) {
     doctorName: r.doctor_name,
     doctorSpecialty: r.doctor_specialty,
     patientId: r.patient_id,
+    patientName: r.patient_name,
     status: r.status,
     endedAt: r.ended_at ?? undefined,
     messages: r.messages ?? [],
@@ -187,6 +188,8 @@ export function mapMessage(r: Row) {
     audioDuration: r.audio_duration ?? undefined,
     prescriptionId: r.prescription_id ?? undefined,
     time: r.time,
+    // Local day of the message — drives the date separators in the chat.
+    date: toDateOnly(r.created_at),
   };
 }
 
@@ -326,6 +329,9 @@ export function mapDocument(r: Row) {
     date: toDateOnly(r.date),
     source: r.source,
     sizeKb: r.size_kb,
+    // In-app screen rendering the document content (prescription, summary…);
+    // null for externally imported files.
+    deepLink: r.deep_link ?? undefined,
   };
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Chip, EmptyState, ErrorState, Screen, SearchBar } from '@/components/ui';
 import { DoctorCard } from '@/components/domain';
 import { ListSkeleton } from '@/components/ui/States';
@@ -18,9 +18,12 @@ function useDebounced<T>(value: T, ms: number): T {
 }
 
 export default function DoctorsList() {
+  const params = useLocalSearchParams<{ specialty?: string }>();
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounced(query, 250);
-  const [specialty, setSpecialty] = useState<string | null>(null);
+  // Pre-filtered entry points (AI symptom orientation) pass the specialty in
+  // the URL; the patient can still change or clear the chip afterwards.
+  const [specialty, setSpecialty] = useState<string | null>(params.specialty ?? null);
   const [availableToday, setAvailableToday] = useState(false);
   const { data: specialtiesData } = useAsync(() => specialtyService.list(), []);
   const specialties = specialtiesData ?? [];

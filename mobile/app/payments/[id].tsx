@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -5,6 +6,7 @@ import { Badge, Button, Card, ErrorState, Screen, useToast } from '@/components/
 import { colors, font, radii, spacing } from '@/constants/theme';
 import { useAppData } from '@/context/AppDataContext';
 import { fcfa, fullDate } from '@/utils/format';
+import { downloadReceiptPdf } from '@/utils/receiptPdf';
 
 const methodLabels: Record<string, string> = {
   mtn_momo: 'MTN Mobile Money',
@@ -14,7 +16,7 @@ const methodLabels: Record<string, string> = {
 
 const categoryLabels: Record<string, string> = {
   consultation: 'Paiement de consultation',
-  medication: 'Achat de médicaments',
+  medkit: 'Achat de médicaments',
   order: 'Commande pharmacie',
 };
 
@@ -22,7 +24,20 @@ export default function PaymentReceipt() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { payments, appointments } = useAppData();
   const { show } = useToast();
+  const [downloading, setDownloading] = useState(false);
   const payment = payments.find((p) => p.id === id);
+
+  const download = async () => {
+    if (!payment) return;
+    setDownloading(true);
+    try {
+      await downloadReceiptPdf(payment);
+    } catch {
+      show('Téléchargement impossible pour le moment.', 'error');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   if (!payment) {
     return (
@@ -112,14 +127,15 @@ export default function PaymentReceipt() {
         <Button
           title="Télécharger le reçu (PDF)"
           icon="download"
-          onPress={() => show('Reçu téléchargé (simulation).')}
+          loading={downloading}
+          onPress={download}
           fullWidth
           size="lg"
         />
-        <Button title="Partager le reçu" icon="share-social" variant="outline" onPress={() => show('Reçu partagé (simulation).')} fullWidth />
         {payment.status === 'failed' && (
           <Button title="Réessayer le paiement" icon="refresh" variant="danger" onPress={() => show('Relancez le paiement depuis le rendez-vous.', 'info')} fullWidth />
         )}
+        <Button title="Retour à l'accueil" icon="home" variant="outline" onPress={() => router.replace('/(patient)')} fullWidth />
       </View>
 
       <Text style={styles.help}>

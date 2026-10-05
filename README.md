@@ -15,7 +15,7 @@ cd backend
 npm install
 cp .env.example .env        # adjust PGUSER/PGHOST, add GROQ_API_KEY (optional)
 npm run db:reset
-npm start                   # http://localhost:4000
+npm start                   # http://localhost:4001
 
 # 2) Mobile app
 cd ../mobile
@@ -23,9 +23,9 @@ npm install
 npx expo start              # scan the QR code (Expo Go) or press a / i / w
 ```
 
-- **Android emulator**: the app automatically targets `http://10.0.2.2:4000`.
-- **Web / iOS simulator**: `http://localhost:4000`.
-- **Physical device**: `EXPO_PUBLIC_API_URL=http://<local-ip>:4000 npx expo start`.
+- **Android emulator**: the app automatically targets `http://10.0.2.2:4001`.
+- **Web / iOS simulator**: `http://localhost:4001`.
+- **Physical device**: `EXPO_PUBLIC_API_URL=http://<local-ip>:4001 npx expo start`.
 
 ## AI provider (optional)
 

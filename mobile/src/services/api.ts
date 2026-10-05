@@ -10,7 +10,7 @@ import { Platform } from 'react-native';
  * - Android emulator reaches the host machine via 10.0.2.2
  * - iOS simulator / device on the same LAN: localhost or EXPO_PUBLIC_API_URL
  */
-export const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? (Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000');
+export const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? (Platform.OS === 'android' ? 'http://10.0.2.2:4001' : 'http://localhost:4001');
 
 export class ApiError extends Error {
   status: number;
@@ -99,9 +99,12 @@ export async function api<T>(path: string, opts: ApiOptions = {}): Promise<T> {
   // Deep-linked screens can mount before the persisted token is loaded —
   // wait for restoration instead of sending an anonymous request.
   if (auth && !currentToken) await restoreToken();
+  const url = `${API_BASE}${path}`;
+  const startedAt = Date.now();
+  console.log(`[api] → ${method} ${url}${body !== undefined ? ` ${JSON.stringify(body)}` : ''}`);
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
+    res = await fetch(url, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -109,7 +112,8 @@ export async function api<T>(path: string, opts: ApiOptions = {}): Promise<T> {
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
-  } catch {
+  } catch (err) {
+    console.log(`[api] ✗ ${method} ${url} — réseau injoignable (${Date.now() - startedAt}ms):`, err);
     throw new ApiError('Serveur injoignable — vérifiez votre connexion.');
   }
 
@@ -125,8 +129,10 @@ export async function api<T>(path: string, opts: ApiOptions = {}): Promise<T> {
       json && typeof json === 'object' && 'error' in json && typeof (json as { error: unknown }).error === 'string'
         ? (json as { error: string }).error
         : `Erreur ${res.status}`;
+    console.log(`[api] ✗ ${method} ${url} ${res.status} (${Date.now() - startedAt}ms) — ${message}`);
     throw new ApiError(message, res.status);
   }
+  console.log(`[api] ← ${method} ${url} ${res.status} (${Date.now() - startedAt}ms)`);
   return json as T;
 }
 

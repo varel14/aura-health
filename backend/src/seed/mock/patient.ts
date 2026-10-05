@@ -101,9 +101,9 @@ export const examResults: ExamResult[] = [
 ];
 
 export const medicalDocuments: MedicalDocument[] = [
-  { id: 'doc1', name: 'Ordonnance — Dr Mbarga', type: 'ordonnance', date: todayISO(-21), source: 'aura', sizeKb: 148 },
+  { id: 'doc1', name: 'Ordonnance — Dr Mbarga', type: 'ordonnance', date: todayISO(-21), source: 'aura', sizeKb: 148, deepLink: '/prescriptions/rx1' },
   { id: 'doc2', name: 'Résultats NFS', type: 'analyse', date: todayISO(-21), source: 'aura', sizeKb: 220 },
   { id: 'doc3', name: 'Compte-rendu appendicectomie', type: 'compte-rendu', date: '2019-07-02', source: 'imported', sizeKb: 640 },
   { id: 'doc4', name: 'Certificat médical sportif', type: 'certificat', date: todayISO(-90), source: 'aura', sizeKb: 96 },
-  { id: 'doc5', name: 'Ordonnance externe (Cabinet Dr Fouda)', type: 'ordonnance', date: todayISO(-45), source: 'imported', sizeKb: 180 },
+  { id: 'doc5', name: 'Ordonnance externe (Cabinet Dr Fouda)', type: 'ordonnance', date: todayISO(-45), source: 'imported', sizeKb: 180, deepLink: '/prescriptions/rx3' },
 ];

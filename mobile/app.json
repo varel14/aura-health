@@ -20,7 +20,8 @@
         {
           "locationWhenInUsePermission": "Autoriser AuraHealth à accéder à votre position pour trouver les pharmacies les plus proches de vous."
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "extra": {
       "router": {

@@ -397,13 +397,6 @@ function ConfirmationStep({
       </Card>
       <View style={{ alignSelf: 'stretch', marginTop: spacing.l, gap: spacing.s }}>
         <Button title="Voir le détail du rendez-vous" onPress={() => router.replace(`/appointment/${appointment.id}`)} size="lg" fullWidth />
-        <Button
-          title="Décrire mes symptômes avant la consultation"
-          icon="sparkles"
-          variant="soft"
-          onPress={() => router.push('/symptoms')}
-          fullWidth
-        />
         <Button title="Retour à l’accueil" variant="outline" onPress={() => router.replace('/(patient)')} fullWidth />
       </View>
     </View>

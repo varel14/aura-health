@@ -95,6 +95,12 @@ router.post('/', requireAuth, route(async (req, res) => {
     deepLink: `/prescriptions/${id}`,
   });
 
+  // The prescription lands in the patient's medical records as a viewable document.
+  await one(
+    `INSERT INTO documents (id, patient_id, name, type, date, source, size_kb, deep_link) VALUES ($1,$2,$3,'ordonnance',$4,'aura',$5,$6)`,
+    [newId('doc'), patientId, `Ordonnance ${created!.code}`, date, 150, `/prescriptions/${id}`],
+  );
+
   res.status(201).json(mapPrescription(created!));
 }));
 
@@ -123,8 +129,8 @@ router.post('/import', route(async (req, res) => {
   );
 
   await one(
-    `INSERT INTO documents (id, patient_id, name, type, date, source, size_kb) VALUES ($1,$2,$3,'ordonnance',$4,'imported',$5)`,
-    [newId('doc'), pid, `Ordonnance ${created!.code}`, date, Number(body.sizeKb ?? 160)],
+    `INSERT INTO documents (id, patient_id, name, type, date, source, size_kb, deep_link) VALUES ($1,$2,$3,'ordonnance',$4,'imported',$5,$6)`,
+    [newId('doc'), pid, `Ordonnance ${created!.code}`, date, Number(body.sizeKb ?? 160), `/prescriptions/${id}`],
   );
 
   await notify({

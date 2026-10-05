@@ -186,8 +186,12 @@ export default function RecordsTab() {
                 right={
                   <Badge label={d.source === 'imported' ? 'Importé' : 'AuraHealth'} variant={d.source === 'imported' ? 'warning' : 'primary'} size="sm" />
                 }
-                chevron={false}
-                onPress={() => show('Prévisualisation du document (simulation).', 'info')}
+                chevron={Boolean(d.deepLink)}
+                onPress={() =>
+                  d.deepLink
+                    ? router.push(d.deepLink)
+                    : show('Prévisualisation du document (simulation).', 'info')
+                }
               />
             ))}
           </View>
