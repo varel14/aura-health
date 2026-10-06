@@ -6,6 +6,7 @@
     "scheme": "aurahealth",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "backgroundColor": "#F4F8F6",
     "plugins": [
       "expo-router",
       "expo-font",

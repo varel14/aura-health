@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     padding: spacing.m,
     marginBottom: spacing.s,
   },
-  optionActive: { borderColor: colors.primary, backgroundColor: '#F4FAF8' },
+  optionActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   optionText: { fontSize: font.size.base, color: colors.text, fontWeight: '500' },
   optionTextActive: { color: colors.primary, fontWeight: '700' },
   photoAttach: {

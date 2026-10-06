@@ -18,7 +18,13 @@ export function Input({ label, error, hint, leftIcon, password, style, ...rest }
   return (
     <View style={{ marginBottom: spacing.m }}>
       {label && <Text style={styles.label}>{label}</Text>}
-      <View style={[styles.box, { borderColor }]}>
+      <View
+        style={[
+          styles.box,
+          { borderColor, backgroundColor: focused ? colors.card : colors.bg },
+          focused && styles.boxFocused,
+        ]}
+      >
         {leftIcon && <Ionicons name={leftIcon} size={18} color={focused ? colors.primary : colors.textFaint} style={{ marginRight: 10 }} />}
         <TextInput
           style={[styles.input, style]}
@@ -29,8 +35,8 @@ export function Input({ label, error, hint, leftIcon, password, style, ...rest }
           {...rest}
         />
         {password && (
-          <Pressable onPress={() => setVisible((v) => !v)} hitSlop={8}>
-            <Ionicons name={visible ? 'eye-off' : 'eye'} size={20} color={colors.textFaint} />
+          <Pressable onPress={() => setVisible((v) => !v)} hitSlop={10} style={styles.eyeBtn}>
+            <Ionicons name={visible ? 'eye-off' : 'eye'} size={20} color={focused ? colors.primary : colors.textFaint} />
           </Pressable>
         )}
       </View>
@@ -99,7 +105,7 @@ export function ChoiceRow({
       style={[styles.choice, selected && styles.choiceSelected, disabled && { opacity: 0.5 }]}
     >
       {icon && (
-        <View style={[styles.choiceIcon, selected && { backgroundColor: colors.primarySoft }]}>
+        <View style={[styles.choiceIcon, selected && { backgroundColor: colors.card }]}>
           <Ionicons name={icon} size={20} color={selected ? colors.primary : colors.textMuted} />
         </View>
       )}
@@ -124,9 +130,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1.5,
     borderRadius: radii.m,
-    backgroundColor: colors.card,
+    backgroundColor: colors.bg,
     paddingHorizontal: spacing.m,
-    minHeight: 50,
+    minHeight: 52,
+  },
+  boxFocused: {
+    backgroundColor: colors.card,
+    shadowColor: colors.primary,
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 1,
+  },
+  eyeBtn: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: -6,
   },
   input: {
     flex: 1,
@@ -173,7 +194,7 @@ const styles = StyleSheet.create({
   },
   choiceSelected: {
     borderColor: colors.primary,
-    backgroundColor: '#F4FAF8',
+    backgroundColor: colors.primarySoft,
   },
   choiceIcon: {
     width: 40,

@@ -1,19 +1,19 @@
 export const colors = {
-  primary: '#6200EE',
-  primaryDark: '#3700B3',
-  primarySoft: '#EDE2FD',
-  primaryTouch: '#5600D1',
+  primary: '#0E9169',
+  primaryDark: '#0A6B4A',
+  primarySoft: '#DDF2E7',
+  primaryTouch: '#0B7D59',
   accent: '#F59E0B',
   ai: '#7C3AED',
   aiSoft: '#EFE9FD',
-  bg: '#F6F8F9',
+  bg: '#F4F8F6',
   card: '#FFFFFF',
-  text: '#152220',
-  textMuted: '#667573',
-  textFaint: '#93A3A0',
-  border: '#E4EAE9',
-  divider: '#EEF2F1',
-  success: '#178A50',
+  text: '#14251D',
+  textMuted: '#63756B',
+  textFaint: '#94A69B',
+  border: '#DFEAE4',
+  divider: '#EBF3EF',
+  success: '#1E8E3E',
   successSoft: '#E1F6EA',
   warning: '#C47F10',
   warningSoft: '#FDF2DC',
@@ -21,7 +21,7 @@ export const colors = {
   dangerSoft: '#FCE8E8',
   info: '#2E6BD6',
   infoSoft: '#E5EEFB',
-  dark: '#0F1D1A',
+  dark: '#0F211A',
   white: '#FFFFFF',
 } as const;
 
@@ -62,23 +62,30 @@ export const font = {
 
 export const shadow = {
   card: {
-    shadowColor: '#0F2E29',
+    shadowColor: '#0A2E20',
     shadowOpacity: 0.06,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
     elevation: 2,
   },
   float: {
-    shadowColor: '#0F2E29',
+    shadowColor: '#0A2E20',
     shadowOpacity: 0.16,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 8 },
     elevation: 8,
   },
+  button: {
+    shadowColor: '#0A6B4A',
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 4,
+  },
 } as const;
 
 export const avatarPalette = [
-  '#6200EE', '#2E6BD6', '#7C3AED', '#C47F10', '#D64545',
+  '#0E9169', '#2E6BD6', '#7C3AED', '#C47F10', '#D64545',
   '#0F8B8D', '#B85C38', '#5B8C2A', '#8A4FBF', '#31699E',
 ];
 

@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.m,
     ...shadow.card,
   },
-  cardSelected: { borderColor: colors.primary, backgroundColor: '#F4FAF8' },
+  cardSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   icon: {
     width: 64,
     height: 64,

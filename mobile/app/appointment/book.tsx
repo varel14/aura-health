@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.l,
     padding: spacing.m,
   },
-  typeCardActive: { borderColor: colors.primary, backgroundColor: '#F4FAF8' },
+  typeCardActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   typeIcon: { width: 46, height: 46, borderRadius: radii.m, alignItems: 'center', justifyContent: 'center' },
   typeTitle: { fontSize: font.size.base, fontWeight: '700', color: colors.text },
   typeSub: { fontSize: font.size.xs, color: colors.textMuted, marginTop: 2, lineHeight: 16 },

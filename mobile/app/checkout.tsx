@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     padding: spacing.m,
     marginBottom: spacing.s,
   },
-  optionActive: { borderColor: colors.primary, backgroundColor: '#F4FAF8' },
+  optionActive: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   optionDisabled: { opacity: 0.5 },
   optionIcon: {
     width: 40,

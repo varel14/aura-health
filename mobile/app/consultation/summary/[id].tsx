@@ -5,19 +5,20 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Badge, Button, Card, EmptyState, ErrorState, Screen, SectionHeader, useToast } from '@/components/ui';
 import { colors, font, radii, spacing } from '@/constants/theme';
 import { useAppData } from '@/context/AppDataContext';
+import { useAuth } from '@/context/AuthContext';
 import { dayLabel } from '@/utils/format';
 
 export default function ConsultationSummaryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { summaries, appointments, prescriptions, threads, refresh } = useAppData();
+  const { summaries, appointments, threads, refresh } = useAppData();
+  const { role } = useAuth();
   const { show } = useToast();
   const [retrying, setRetrying] = useState(false);
 
   const appointment = appointments.find((a) => a.id === id);
-  let summary = summaries.find((s) => s.appointmentId === id);
+  const summary = summaries.find((s) => s.appointmentId === id);
 
   const thread = threads.find((t) => t.appointmentId === id);
-  const linkedRx = prescriptions.find((rx) => rx.consultationId === id) ?? (summary?.prescriptionId ? prescriptions.find((rx) => rx.id === summary!.prescriptionId) : undefined);
 
   // Le compte-rendu est généré par le serveur dès la clôture de la consultation
   // (raccrochage vidéo ou fin de fil) : il n'y a plus de génération manuelle à
@@ -204,20 +205,22 @@ export default function ConsultationSummaryScreen() {
       )}
 
       <View style={{ marginTop: spacing.l, gap: spacing.s }}>
-        {linkedRx && (
+        {thread && (
           <Button
-            title="Voir l’ordonnance du médecin"
-            icon="document-text"
-            onPress={() => router.push(`/prescriptions/${linkedRx.id}`)}
+            title="Retourner à la consultation"
+            icon="chatbubbles"
+            onPress={() => router.push(`/consultation/chat/${thread.id}`)}
             size="lg"
             fullWidth
           />
         )}
-        {thread && (
-          <Button title="Retourner à la consultation" icon="chatbubbles" variant="soft" onPress={() => router.push(`/consultation/chat/${thread.id}`)} fullWidth />
-        )}
-        <Button title="Contacter le médecin" icon="chatbubble-ellipses" variant="outline" onPress={() => show('Votre message sera transmis au médecin (simulation).', 'info')} fullWidth />
-        <Button title="Partager / télécharger le résumé" icon="share-social" variant="ghost" onPress={() => show('Résumé partagé (simulation).')} fullWidth />
+        <Button
+          title="Retour à l’accueil"
+          icon="home"
+          variant="outline"
+          onPress={() => router.replace(role === 'doctor' ? '/(doctor)' : '/(patient)')}
+          fullWidth
+        />
       </View>
     </Screen>
   );

@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   },
   methodSelected: {
     borderColor: colors.primary,
-    backgroundColor: '#F4FAF8',
+    backgroundColor: colors.primarySoft,
   },
   methodIcon: {
     width: 44,

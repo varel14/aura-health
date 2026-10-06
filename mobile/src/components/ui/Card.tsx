@@ -69,7 +69,7 @@ export function Chip({
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.chip, selected && styles.chipSelected]}
+      style={({ pressed }) => [styles.chip, selected && styles.chipSelected, pressed && { opacity: 0.75 }]}
     >
       {icon}
       <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{label}</Text>
